@@ -1,0 +1,42 @@
+---
+title: "30-feature-engineering"
+output: html_notebook
+---
+
+
+```{r}
+#View(PimaIndiansDiabetes2)
+```
+
+
+Maybe diabetes can be predicted from an observation's deviation from the average in the varaible. I want to standardize this value, to make a value relative to a column. Standardization will also making it easier to compare and understand the scale where the varaible is being used for modeling. Some varaibles such as insulin and glucose have unit measures that are very difficult to understand. 
+
+This function will take in a dataframe and a vector relating to the varaible you want to standardize. It will then output a dataframe with the new standardized variable at the front of the dataframe. 
+```{r Standardize}
+scale2 <- function(x, na.rm = TRUE) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE) # x is a vector
+
+std_variable <- function(df, vars)
+{
+  df %>%
+    mutate_at(vars, list(std_input = scale2), na.rm = T) %>%
+    select(contains("_input"), vars, everything())
+}
+```
+
+
+I want to create a logical variable (true or false) that determines whether or not someone is obese, that is a bmi over 30. Since this dataset is all numeric I can only create group_by's based upon specific ranges of values within these columns. By grouping and splitting the mass variable to look at obesity, we not only can look at the correlation between mass and diabetes but also compare the groups within the varaible itself. It can give us more granularity within our data. 
+
+The functions takes in a dataframe and vector relating to the varaible of interest. In our dataset this will be "mass". It will then output a dataframe containing the logical varaible "is_obese" at the front of the dataframe along with the "mass" that was used by the function.
+```{r}
+over30 <- function(x, na.rm = TRUE) ifelse(x > 30, TRUE, FALSE) # x is a vector
+
+obese <- function(df, vars)
+{
+  df %>%
+    mutate_at(vars, list(is_obese = over30)) %>%
+    select(contains("is_obese"), vars, everything())
+}
+```
+
+
+

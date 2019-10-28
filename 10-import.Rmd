@@ -1,0 +1,145 @@
+---
+title: "10-import"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Libraries
+```{r Libraries}
+library(tidyverse)
+library(janitor)
+library(readr)
+library(tidyr)
+library(assertr)
+```
+
+#Read in the data
+```{r Dataset}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>% clean_names()
+#View(PimaIndiansDiabetes2)
+```
+
+# Initial data exploration
+```{r Explore}
+dim(PimaIndiansDiabetes2)
+str(PimaIndiansDiabetes2)
+```
+With only 768 observations, I cannot afford to remove data because of missing values. Most columns are numeric except for the label column which I will want to change to numberic as well. 
+
+This data containes 8 predictor variables and 1 target outcome variable. So with this data I would like to try and predict whether or not someone has diabetes based upon these medical predictor variables which includes, age, blood pressure, number of times pregnant, and glucose concentraion among others.
+
+# Checking the data
+
+At the moment I don't have the expertise to fully understand normal or abnormal ranges relating to varaibles like insulin, blood pressure, glucose, pedigree, and triceps so I will check looser bounds and simply make sure that there are no definite input errors with the dataset.
+
+
+Diabetes varaible is currently a character type indicating whether the person has diabetes or not. I want to first check if the labels are exhaustive and then transform it to a binary variable so that it can be better used for modeling.
+```{r BinaryDiabetes}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  assert(in_set("pos", "neg"), diabetes)
+
+PimaIndiansDiabetes2$diabetes <- ifelse(PimaIndiansDiabetes2$diabetes == "pos", 1, 0)
+```
+
+
+I want to verify that bmi is greater than zero. 
+```{r AssertMass, include= FALSE}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  verify(mass > 0)
+```
+
+
+I want to verify that 2-hour serum insulin levels are greater than zero
+```{r AssertInsulin, include= FALSE}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  assert(within_bounds(16,166), insulin)
+```
+
+
+I want to verify that triceps skin fold thickness is greater than zero
+```{r VerifyTriceps, include= FALSE}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  verify(triceps > 0)
+```
+
+
+I want to verify that blood pressure is greater than zero
+```{r VerifyPressure, include= FALSE}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  verify(pressure > 0)
+```
+
+
+I want to verify that glucose concentration after 2 hours of a glucose tolernace test is greater than zero
+```{r VerifyGlucose, include= FALSE}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  verify(glucose > 0)
+```
+
+
+I want to verify that the number of times pregnant is within reasonable bounds
+```{r VerfiyPregnant, include= FALSE}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  assert(within_bounds(0,16), pregnant)
+```
+
+
+I want to verify that the diabetes pedigree function ranges from 0 to 1
+```{r AssertPedigree, include= FALSE}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  assert(within_bounds(0,1), pedigree)
+```
+There are a few value that exceed 1 but I do not know enough about the diabetes pedigree function to know if this is possible or not.
+
+
+I want to verify that age is within reasonable bounds
+```{r AssertAge, include= FALSE}
+PimaIndiansDiabetes2 <- read_csv("PimaIndiansDiabetes2.csv") %>%
+  assert(within_bounds(0,110), age)
+```
+
+# Cleaning Data
+
+NA's are clearly the biggest problem in the dataset so we will have to replace them. In the case of replacing missing values, I do not want the replacement values to be skewed by the presence of outliers so I am electing to use the median value in these columns to replace the NA's.
+
+```{r ColumnNA}
+which(is.na(PimaIndiansDiabetes2$pregnant))
+which(is.na(PimaIndiansDiabetes2$glucose))
+which(is.na(PimaIndiansDiabetes2$pressure))
+which(is.na(PimaIndiansDiabetes2$triceps))
+which(is.na(PimaIndiansDiabetes2$insulin))
+which(is.na(PimaIndiansDiabetes2$mass))
+which(is.na(PimaIndiansDiabetes2$pedigree))
+which(is.na(PimaIndiansDiabetes2$age))
+```
+Columns of age, pedigree, and pregnant have no missing values, but the other 5 predictor columns do. Glucose and mass have very few missing values, while triceps has over 200 and insulin has nearly 400, which is over half of the total observations. For the time being we will keep all columns but it is unlikely that we will be able to do anything with insulin and triceps.
+
+Replace glucose with median value
+```{r GlucoseReplace}
+PimaIndiansDiabetes2$glucose <- ifelse(is.na(PimaIndiansDiabetes2$glucose) == T, median(PimaIndiansDiabetes2$glucose, na.rm = T), PimaIndiansDiabetes2$glucose)
+```
+
+Replace insulin with median value
+```{r InsulinReplace}
+PimaIndiansDiabetes2$insulin <- ifelse(is.na(PimaIndiansDiabetes2$insulin) == T, median(PimaIndiansDiabetes2$insulin, na.rm = T), PimaIndiansDiabetes2$insulin)
+```
+
+Replace pressure with median value
+```{r PressureReplace}
+PimaIndiansDiabetes2$pressure <- ifelse(is.na(PimaIndiansDiabetes2$pressure) == T, median(PimaIndiansDiabetes2$pressure, na.rm = T), PimaIndiansDiabetes2$pressure)
+```
+
+Replace triceps with median value
+```{r TricepsReplace}
+PimaIndiansDiabetes2$triceps <- ifelse(is.na(PimaIndiansDiabetes2$triceps) == T, median(PimaIndiansDiabetes2$triceps, na.rm = T), PimaIndiansDiabetes2$triceps)
+```
+
+Replace mass with median value
+```{r MassReplace}
+PimaIndiansDiabetes2$mass <- ifelse(is.na(PimaIndiansDiabetes2$mass) == T, median(PimaIndiansDiabetes2$mass, na.rm = T), PimaIndiansDiabetes2$mass)
+```
+
+
+
+
