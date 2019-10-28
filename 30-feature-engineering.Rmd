@@ -27,7 +27,7 @@ std_variable <- function(df, vars)
 I want to create a logical variable (true or false) that determines whether or not someone is obese, that is a bmi over 30. Since this dataset is all numeric I can only create group_by's based upon specific ranges of values within these columns. By grouping and splitting the mass variable to look at obesity, we not only can look at the correlation between mass and diabetes but also compare the groups within the varaible itself. It can give us more granularity within our data. 
 
 The functions takes in a dataframe and vector relating to the varaible of interest. In our dataset this will be "mass". It will then output a dataframe containing the logical varaible "is_obese" at the front of the dataframe along with the "mass" that was used by the function.
-```{r}
+```{r Obesity}
 over30 <- function(x, na.rm = TRUE) ifelse(x > 30, TRUE, FALSE) # x is a vector
 
 obese <- function(df, vars)
