@@ -38,5 +38,16 @@ obese <- function(df, vars)
 }
 ```
 
+The chunk below is created by Alan, which answer the issue named "At Risk Age".
+```{r At risk age}
+over44 <- function(x, na.rm = TRUE) ifelse(x > 44, TRUE, FALSE)
+
+at_risk_age <- function(df, vars)
+{
+  df %>%
+    mutate_at(vars, list(age45 = over44)) %>%
+    select(contains("age45"), vars, everything())
+}
+```
 
 

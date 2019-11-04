@@ -10,6 +10,9 @@ std_variable("glucose")
 
 PimaIndiansDiabetes2 %>%
   obese("mass")
+
+PimaIndiansDiabetes2 %>%
+  at_risk_age("age")
 ```
 
 The functions both appear to be working correctly new varaibles are construct and arranged properly in the dataset. I now want to create the augmented dataframe with the new features so that it is ready for modeling. I will also move the target variable "diabetes" to the front of the dataframe, followed by the mutated varaibles and the inital varaibles used to contruct the new features.
@@ -17,6 +20,7 @@ The functions both appear to be working correctly new varaibles are construct an
 pid_augmented_df <- PimaIndiansDiabetes2 %>%
   std_variable("glucose") %>%
   obese("mass") %>%
+  at_risk_age("age")%>%
   select(diabetes, everything())
 
 write.csv(pid_augmented_df, "pid_df.csv")
@@ -30,6 +34,9 @@ pid_df <- read_csv("pid_df.csv") %>%
 
 pid_df <- read_csv("pid_df.csv") %>%
   assert(in_set(TRUE,FALSE), is_obese)
+
+pid_df <- read_csv("pid_df.csv") %>%
+  assert(in_set(TRUE,FALSE), age45)
   
 ```
 
